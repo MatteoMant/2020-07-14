@@ -5,9 +5,14 @@
 package it.polito.tdp.PremierLeague;
 
 import java.net.URL;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.PremierLeague.model.DifferenzaPunti;
 import it.polito.tdp.PremierLeague.model.Model;
+import it.polito.tdp.PremierLeague.model.Team;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -35,7 +40,7 @@ public class FXMLController {
     private Button btnSimula; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbSquadra"
-    private ComboBox<?> cmbSquadra; // Value injected by FXMLLoader
+    private ComboBox<Team> cmbSquadra; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtN"
     private TextField txtN; // Value injected by FXMLLoader
@@ -48,12 +53,41 @@ public class FXMLController {
 
     @FXML
     void doClassifica(ActionEvent event) {
-
+    	txtResult.clear();
+    	Team s = cmbSquadra.getValue();
+    	if (s == null) {
+    		txtResult.setText("Per favore selezionare una squadra!");
+    		return;
+    	}
+    	
+    	List<DifferenzaPunti> squadreMigliori = this.model.calcolaSquadreMigliori(s);
+    	Collections.sort(squadreMigliori);
+    	txtResult.setText("SQUADRE MIGLIORI: \n");
+    	for (DifferenzaPunti d : squadreMigliori) {
+    		txtResult.appendText(d.getTeam() + " (" + d.getPuntiDiDifferenza() +")\n");
+    	}
+    	
+    	List<DifferenzaPunti> squadrePeggiori = this.model.calcolaSquadrePeggiori(s);
+    	Collections.sort(squadrePeggiori);
+    	txtResult.appendText("\nSQUADRE PEGGIORI: \n");
+    	for (DifferenzaPunti d : squadrePeggiori) {
+    		txtResult.appendText(d.getTeam() + " (" + d.getPuntiDiDifferenza() +")\n");
+    	}
+    	
     }
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
-
+    	txtResult.clear();
+    	this.model.creaGrafo();
+    	txtResult.setText("Grafo creato!\n");
+    	txtResult.appendText("# Vertici " + this.model.getNumVertici() + "\n");
+    	txtResult.appendText("# Archi " + this.model.getNumArchi() + "\n");
+    	
+    	// Adesso possiamo riempire la comboBox delle squadre
+    	List<Team> lista = new LinkedList<>(this.model.getAllTeams());
+    	Collections.sort(lista);
+    	cmbSquadra.getItems().addAll(lista);
     }
 
     @FXML
